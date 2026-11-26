@@ -14,6 +14,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;bac
 .scanlines{position:fixed;inset:0;pointer-events:none;z-index:20;opacity:.1;background:repeating-linear-gradient(to bottom,transparent 0 3px,#000 4px 5px)}
 .shell{width:min(100%,900px);position:relative;z-index:1;border:2px solid var(--blue);padding:clamp(16px,3vw,30px);background:linear-gradient(145deg,rgba(17,21,43,.98),rgba(7,9,22,.99));box-shadow:0 0 12px #31d9ff88,0 0 45px #31d9ff20}
 .topline,.hud{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--blue);font-size:22px;letter-spacing:1px}
+.topline button{padding:6px 9px;font-size:9px;box-shadow:2px 2px #075b8c}
 .blink{animation:blink 1s steps(2,start) infinite;color:var(--yellow)}@keyframes blink{to{visibility:hidden}}
 .hero{text-align:center;padding:30px 0 20px}
 .logo{margin:0;font-family:'Press Start 2P',monospace;font-size:clamp(30px,8vw,65px);line-height:1.5;color:var(--yellow);text-shadow:4px 4px #a34b12,0 0 15px #ffe34d88}
@@ -51,26 +52,26 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <body>
 <div class="scanlines"></div>
 <main class="shell">
- <div class="topline"><span>★ JAMELY</span><span class="blink">● READY</span></div>
+ <div class="topline"><span>★ PLAYER 1</span><button class="secondary" id="musicButton" aria-label="Activar o silenciar la música">♪ ON</button><span class="blink">● READY</span></div>
  <section id="home" class="hero">
   <h1 class="logo">BATH<span>TIME</span></h1>
   <p class="tagline">ONE PLAYER · ONE ADVENTURE</p>
-  <div class="menu"><button id="startButton">▶ START GAME</button><button class="secondary" id="helpButton">HOW TO PLAY</button></div>
+  <div class="menu"><button id="startButton">▶️ START GAME</button><button class="secondary" id="helpButton">HOW TO PLAY</button></div>
  </section>
  <section id="gameScreen">
-  <div class="hud"><span>SCORE: <b id="score">0000</b></span><span>DOTS: <b id="remaining">00</b></span><span>LIVES: <b id="lives">♥ ♥ ♥</b></span></div>
+  <div class="hud"><span>SCORE: <b id="score">0000</b></span><span>DOTS: <b id="remaining">00</b></span><span>LIVES: <b id="lives">♥️ ♥️ ♥️ ♥️</b></span></div>
   <div class="canvas-wrap"><canvas id="game" width="420" height="330" aria-label="Laberinto del juego Bath Time"></canvas></div>
   <p class="game-note" id="gameMessage">¡Recoge todos los puntos y evita al guardián!</p>
   <div class="touch-controls" aria-label="Controles táctiles">
-   <button data-dir="up" aria-label="Arriba">▲</button><button data-dir="left" aria-label="Izquierda">◀</button><button data-dir="down" aria-label="Abajo">▼</button><button data-dir="right" aria-label="Derecha">▶</button>
+   <button data-dir="up" aria-label="Arriba">▲</button><button data-dir="left" aria-label="Izquierda">◀️</button><button data-dir="down" aria-label="Abajo">▼</button><button data-dir="right" aria-label="Derecha">▶️</button>
   </div>
   <div class="actions"><button class="secondary" id="pauseButton">PAUSE</button><button class="secondary" id="menuButton">MAIN MENU</button></div>
  </section>
- <div class="footer"><span>MODE: <strong>1 PLAYER</strong></span><span>HIGH SCORE: <strong id="highScore">0000</strong></span><span>© BATH TIME</span></div>
+ <div class="footer"><span>MODE: <strong>1 PLAYER</strong></span><span>HIGH SCORE: <strong id="highScore">0000</strong></span><span>©️ BATH TIME</span></div>
 </main>
 
 <div class="modal-backdrop" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
- <div class="modal"><h3 id="helpTitle">HOW TO PLAY</h3><p>Recoge todos los puntos del laberinto y evita al guardián. ¡Si te atrapa, perderás una vida!</p><p>PC: usa las flechas o WASD. Móvil: botones de dirección o desliza el dedo sobre el laberinto.</p><p>Completa el nivel para desbloquear la recompensa. </p><button id="closeHelp">GOT IT!</button></div>
+ <div class="modal"><h3 id="helpTitle">HOW TO PLAY</h3><p>Recoge todos los puntos del laberinto y evita al guardián. ¡Si te atrapa, perderás una vida!</p><p>PC: usa las flechas o WASD. Móvil: botones de dirección o desliza el dedo sobre el laberinto.</p><button id="closeHelp">GOT IT!</button></div>
 </div>
 
 <div class="modal-backdrop" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
@@ -87,7 +88,11 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <script>
 (() => {
  // Ruta del PDF: debe estar en la misma carpeta que este index.html
- const PDF_URL = 'Hora_del_bano.pdf';
+ // En celular se abre la versión vertical; en computadora, la normal
+ const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)) // iPad que se identifica como Mac
+  || (window.matchMedia && window.matchMedia('(pointer:coarse) and (max-width:900px)').matches);
+ const PDF_URL = IS_MOBILE ? 'hora_del_bano_vertical.pdf' : 'Hora_del_bano.pdf';
 
  const $ = id => document.getElementById(id);
  const home=$('home'), gameScreen=$('gameScreen'), canvas=$('game'), ctx=canvas.getContext('2d');
@@ -109,7 +114,8 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
  const TILE=30, H=map.length;
  let player, enemy, dots, score=0, lives=3, running=false, paused=false, raf=0, last=0, resumeAt=0;
  let queued={x:0,y:0}, face={x:1,y:0}, mouth=0;
- const PSPEED=5.4, GSPEED=4.4; // casillas por segundo (el fantasma es ~15% más lento, como en el original)
+ const PSPEED=6.4, GSPEED=3.0, GSPEED_MAX=5.4, RAMP=15; // casillas por segundo; el fantasma acelera de 3.0 a 5.4 durante 15 s de juego
+ let gameTime=0; // segundos de juego activo (no cuenta la pausa)
 
  const store={get(){try{return Number(localStorage.getItem('bathTimeHighScore')||0)}catch(e){return 0}},set(v){try{localStorage.setItem('bathTimeHighScore',v)}catch(e){}}};
  let high=store.get();
@@ -118,8 +124,8 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 
  const walls=(x,y)=>!map[y]||map[y][x]==='#';
  function resetPositions(){player={x:1,y:1,dx:0,dy:0};enemy={x:12,y:9,dx:0,dy:0};face={x:1,y:0};queued={x:0,y:0};resumeAt=performance.now()+700;}
- function newGame(){score=0;lives=3;dots=new Set();map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='.')dots.add(`${x},${y}`)}));resetPositions();updateHud();message.textContent='¡Recoge todos los puntos y evita al guardián!';}
- function updateHud(){scoreEl.textContent=pad(score);remainingEl.textContent=pad(dots.size,2);livesEl.textContent='♥ '.repeat(lives).trim()||'—';}
+ function newGame(){score=0;lives=4;gameTime=0;dots=new Set();map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='.')dots.add(`${x},${y}`)}));resetPositions();updateHud();message.textContent='¡Recoge todos los puntos y evita al guardián!';}
+ function updateHud(){scoreEl.textContent=pad(score);remainingEl.textContent=pad(dots.size,2);livesEl.textContent='♥️ '.repeat(lives).trim()||'—';}
 
  function draw(){
   ctx.fillStyle='#050713';ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -171,7 +177,9 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
   if(player.dx||player.dy)mouth+=dt*16;
   const key=`${Math.round(player.x)},${Math.round(player.y)}`;
   if(dots.has(key)){dots.delete(key);score+=10;updateHud();}
-  advance(enemy,GSPEED*dt,pickGhost);
+  gameTime+=dt;
+  const gs=GSPEED+(GSPEED_MAX-GSPEED)*Math.min(gameTime/RAMP,1);
+  advance(enemy,gs*dt,pickGhost);
   if(Math.hypot(player.x-enemy.x,player.y-enemy.y)<.6){hit();return;}
   if(dots.size===0)finish(true);
  }
@@ -238,6 +246,35 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
  $('helpButton').addEventListener('click',()=>helpModal.classList.add('open'));
  $('closeHelp').addEventListener('click',()=>helpModal.classList.remove('open'));
  helpModal.addEventListener('click',e=>{if(e.target===helpModal)helpModal.classList.remove('open');});
+
+ // ===== MÚSICA ALEATORIA (menú y juego) =====
+ // Pon tus canciones en una carpeta "musica" junto a este archivo y lístalas aquí
+ const SONGS=['musica/cancion1.mp3','musica/cancion2.mp3','musica/cancion3.mp3'];
+ const music=new Audio();music.volume=.5;
+ const musicBtn=$('musicButton');
+ let queue=[],musicOn=true,musicStarted=false,fails=0;
+ function nextSong(){
+  if(!SONGS.length)return;
+  if(!queue.length)queue=SONGS.slice().sort(()=>Math.random()-.5); // baraja: no repite hasta que suenen todas
+  music.src=queue.pop();
+  music.play().catch(()=>{});
+ }
+ music.addEventListener('ended',nextSong);
+ music.addEventListener('playing',()=>{fails=0;});
+ music.addEventListener('error',()=>{if(++fails<SONGS.length*2)nextSong();});
+ // los navegadores solo permiten audio tras una interacción: arranca con el primer toque, clic o tecla
+ function firstGesture(){if(musicStarted||!musicOn)return;musicStarted=true;nextSong();}
+ ['click','touchend','keydown'].forEach(ev=>document.addEventListener(ev,firstGesture));
+ musicBtn.addEventListener('click',()=>{
+  musicOn=!musicOn;musicBtn.textContent=musicOn?'♪ ON':'♪ OFF';
+  if(!musicOn)music.pause();
+  else if(!musicStarted){musicStarted=true;nextSong();}
+  else music.play().catch(()=>{});
+ });
+ document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)music.pause();
+  else if(musicOn&&musicStarted)music.play().catch(()=>{});
+ });
 })();
 </script>
 </body>

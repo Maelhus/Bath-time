@@ -1,1 +1,144 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcade Adventure</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #090d1b;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 650px;
+    text-align: center;
+    padding: 45px 25px;
+    background: #111a30;
+    border: 2px solid #263b65;
+    border-radius: 18px;
+    box-shadow: 0 0 35px #142b55;
+}
+
+.logo {
+    font-size: 65px;
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-size: clamp(30px, 7vw, 48px);
+    color: #ffdf45;
+    margin: 10px 0;
+    letter-spacing: 3px;
+}
+
+.subtitle {
+    color: #a9b9d5;
+    margin-bottom: 35px;
+}
+
+button {
+    background: #ffdf45;
+    color: #101629;
+    border: none;
+    border-radius: 9px;
+    padding: 16px 38px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+    background: #ffe979;
+}
+
+.instructions {
+    margin-top: 30px;
+    color: #a9b9d5;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+#gameScreen {
+    display: none;
+}
+
+#gameScreen h2 {
+    color: #ffdf45;
+}
+
+.back {
+    margin-top: 20px;
+    background: #263b65;
+    color: white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div id="menu">
+        <div class="logo">🟡</div>
+
+        <h1>ARCADE ADVENTURE</h1>
+
+        <p class="subtitle">
+            Una aventura está por comenzar...
+        </p>
+
+        <button onclick="startGame()">
+            INICIAR JUEGO
+        </button>
+
+        <div class="instructions">
+            <p>★ Explora el laberinto</p>
+            <p>★ Supera los desafíos</p>
+            <p>★ Completa tu misión</p>
+        </div>
+    </div>
+
+    <div id="gameScreen">
+        <div class="logo">🎮</div>
+        <h2>¡PREPÁRATE!</h2>
+        <p>Próximamente comenzará tu aventura.</p>
+        <button class="back" onclick="backMenu()">
+            VOLVER AL MENÚ
+        </button>
+    </div>
+
+</div>
+
+<script>
+function startGame() {
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+}
+
+function backMenu() {
+    document.getElementById("gameScreen").style.display = "none";
+    document.getElementById("menu").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+

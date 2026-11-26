@@ -34,7 +34,8 @@ button.secondary{background:transparent;color:var(--blue);border-color:var(--blu
 canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-action:none}
 .game-note{font-size:20px;color:var(--muted);margin:10px 0}
 .touch-controls{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,48px);gap:6px;justify-content:center;margin:14px auto 4px}
-.touch-controls button{padding:4px;font-size:20px;box-shadow:2px 2px #075b8c;background:#111a30;color:var(--blue);border-color:var(--blue);touch-action:none}
+.touch-controls button{padding:4px;font-size:20px;box-shadow:2px 2px #075b8c;background:#111a30;color:var(--blue);border-color:var(--blue);touch-action:none;display:grid;place-items:center}
+.touch-controls button svg{pointer-events:none}
 .touch-controls button:nth-child(1){grid-column:2;grid-row:1}
 .touch-controls button:nth-child(2){grid-column:1;grid-row:2}
 .touch-controls button:nth-child(3){grid-column:2;grid-row:2}
@@ -52,7 +53,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <body>
 <div class="scanlines"></div>
 <main class="shell">
- <div class="topline"><span>★ PLAYER 1</span><button class="secondary" id="musicButton" aria-label="Activar o silenciar la música">♪ ON</button><span class="blink">● READY</span></div>
+ <div class="topline"><span>★ JAMELY</span><button class="secondary" id="musicButton" aria-label="Activar o silenciar la música">♪ ON</button><span class="blink">● READY</span></div>
  <section id="home" class="hero">
   <h1 class="logo">BATH<span>TIME</span></h1>
   <p class="tagline">ONE PLAYER · ONE ADVENTURE</p>
@@ -63,7 +64,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
   <div class="canvas-wrap"><canvas id="game" width="420" height="330" aria-label="Laberinto del juego Bath Time"></canvas></div>
   <p class="game-note" id="gameMessage">¡Recoge todos los puntos y evita al guardián!</p>
   <div class="touch-controls" aria-label="Controles táctiles">
-   <button data-dir="up" aria-label="Arriba">▲</button><button data-dir="left" aria-label="Izquierda">◀️</button><button data-dir="down" aria-label="Abajo">▼</button><button data-dir="right" aria-label="Derecha">▶️</button>
+   <button data-dir="up" aria-label="Arriba"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 5 21 19H3z" fill="currentColor"/></svg></button><button data-dir="left" aria-label="Izquierda"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 12 19 3v18z" fill="currentColor"/></svg></button><button data-dir="down" aria-label="Abajo"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 19 3 5h18z" fill="currentColor"/></svg></button><button data-dir="right" aria-label="Derecha"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M19 12 5 3v18z" fill="currentColor"/></svg></button>
   </div>
   <div class="actions"><button class="secondary" id="pauseButton">PAUSE</button><button class="secondary" id="menuButton">MAIN MENU</button></div>
  </section>
@@ -71,7 +72,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 </main>
 
 <div class="modal-backdrop" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
- <div class="modal"><h3 id="helpTitle">HOW TO PLAY</h3><p>Recoge todos los puntos del laberinto y evita al guardián. ¡Si te atrapa, perderás una vida!</p><p>PC: usa las flechas o WASD. Móvil: botones de dirección o desliza el dedo sobre el laberinto.</p><button id="closeHelp">GOT IT!</button></div>
+ <div class="modal"><h3 id="helpTitle">HOW TO PLAY</h3><p>Recoge todos los puntos del laberinto y evita al guardián. ¡Si te atrapa, perderás una vida! Completa el juego para recibir tu recompensa especial, especial.</p><p>PC: usa las flechas o WASD. Móvil: botones de dirección o desliza el dedo sobre el laberinto.</p><button id="closeHelp">GOT IT!</button></div>
 </div>
 
 <div class="modal-backdrop" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">

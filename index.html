@@ -1,182 +1,140 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080914">
-  <title>Bath Time — Arcade</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
-
-    :root {
-      --bg: #080914;
-      --panel: #101326;
-      --blue: #31d9ff;
-      --yellow: #ffe34d;
-      --pink: #ff4fd8;
-      --white: #f4f7ff;
-      --muted: #a6aecb;
-    }
-    * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
-    body {
-      margin: 0; color: var(--white); background: var(--bg);
-      font-family: 'VT323', monospace; overflow-x: hidden;
-      display: grid; place-items: center; padding: 22px;
-    }
-    body::before {
-      content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .23;
-      background-image: linear-gradient(rgba(49,217,255,.12) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(49,217,255,.12) 1px, transparent 1px);
-      background-size: 32px 32px;
-      mask-image: linear-gradient(to bottom, black, transparent 90%);
-    }
-    .scanlines {
-      position: fixed; inset: 0; pointer-events: none; z-index: 5; opacity: .12;
-      background: repeating-linear-gradient(to bottom, transparent 0 3px, #000 4px 5px);
-    }
-    .shell {
-      width: min(100%, 850px); position: relative; z-index: 1;
-      border: 2px solid var(--blue); padding: clamp(18px, 4vw, 38px);
-      background: linear-gradient(145deg, rgba(17,21,43,.97), rgba(7,9,22,.98));
-      box-shadow: 0 0 12px rgba(49,217,255,.55), 0 0 55px rgba(49,217,255,.13),
-                  inset 0 0 28px rgba(49,217,255,.06);
-    }
-    .shell::before, .shell::after {
-      content: ""; position: absolute; width: 14px; height: 14px;
-      border-color: var(--yellow); border-style: solid;
-    }
-    .shell::before { top: -5px; left: -5px; border-width: 3px 0 0 3px; }
-    .shell::after { bottom: -5px; right: -5px; border-width: 0 3px 3px 0; }
-    .topline { display:flex; justify-content:space-between; gap:12px; color:var(--blue);
-      font-size: clamp(18px, 3vw, 25px); letter-spacing: 2px; }
-    .blink { animation: blink 1s steps(2, start) infinite; color: var(--yellow); }
-    @keyframes blink { to { visibility: hidden; } }
-    .hero { text-align:center; padding: clamp(24px, 6vw, 55px) 0 20px; }
-    .logo {
-      margin: 0; font-family:'Press Start 2P', monospace;
-      font-size: clamp(30px, 8vw, 67px); line-height:1.45;
-      letter-spacing: -3px; color:var(--yellow);
-      text-shadow: 4px 4px 0 #a34b12, 0 0 12px rgba(255,227,77,.7), 0 0 35px rgba(255,227,77,.28);
-    }
-    .logo span { display:block; color:var(--blue); font-size:.72em;
-      text-shadow: 4px 4px 0 #075b8c, 0 0 15px rgba(49,217,255,.65); }
-    .mascots { display:flex; justify-content:center; align-items:center; gap:clamp(18px, 5vw, 42px);
-      margin: 25px 0 14px; min-height:74px; }
-    .pac { width:0;height:0;border:34px solid var(--yellow);border-right-color:transparent;
-      border-radius:50%; filter:drop-shadow(0 0 10px rgba(255,227,77,.7));
-      animation: chomp .55s steps(2,end) infinite; }
-    @keyframes chomp { 50% { transform:rotate(45deg); } }
-    .ghost { width:48px;height:48px;position:relative;background:var(--pink);
-      border-radius:24px 24px 5px 5px;filter:drop-shadow(0 0 9px rgba(255,79,216,.65)); }
-    .ghost::before { content:"";position:absolute;left:10px;top:17px;width:7px;height:10px;
-      background:white;border-radius:50%;box-shadow:17px 0 white; }
-    .ghost::after { content:"";position:absolute;left:12px;top:20px;width:4px;height:6px;
-      background:#15172c;border-radius:50%;box-shadow:17px 0 #15172c; }
-    .dot { width:9px;height:9px;background:var(--yellow);border-radius:50%;box-shadow:0 0 10px var(--yellow); }
-    .tagline { color:var(--muted);font-size:clamp(22px,4vw,30px);letter-spacing:2px;margin:12px 0 0; }
-    .menu { display:grid;gap:13px;width:min(100%,360px);margin:30px auto 22px; }
-    button {
-      border:2px solid var(--yellow); background:var(--yellow); color:#111323;
-      padding:16px 18px; font-family:'Press Start 2P',monospace;
-      font-size:clamp(10px,2.4vw,13px); line-height:1.6; cursor:pointer;
-      box-shadow:4px 4px 0 #9a6418; transition:transform .12s, box-shadow .12s, filter .12s;
-    }
-    button:hover { transform:translate(-2px,-2px);box-shadow:6px 6px 0 #9a6418;filter:brightness(1.08); }
-    button:active { transform:translate(3px,3px);box-shadow:1px 1px 0 #9a6418; }
-    button.secondary { background:transparent;color:var(--blue);border-color:var(--blue);box-shadow:4px 4px 0 #075b8c; }
-    button.secondary:hover { box-shadow:6px 6px 0 #075b8c; }
-    .footer { border-top:1px dashed rgba(49,217,255,.4);padding-top:17px;
-      display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);
-      font-size:21px;letter-spacing:1px; }
-    .footer strong { color:var(--yellow);font-weight:normal; }
-    .screen { display:none;text-align:center;min-height:390px;padding:35px 0 15px; }
-    .screen.active { display:block; }
-    .screen h2 { font-family:'Press Start 2P',monospace;color:var(--yellow);
-      font-size:clamp(17px,4vw,25px);line-height:1.7; }
-    .screen p { color:var(--muted);font-size:26px;line-height:1.35; }
-    .screen .menu { margin-top:28px; }
-    .key { display:inline-block;border:1px solid var(--blue);padding:4px 9px;color:var(--blue);margin:3px; }
-    .modal-backdrop { display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);
-      z-index:10;place-items:center;padding:20px; }
-    .modal-backdrop.open { display:grid; }
-    .modal { width:min(100%,480px);background:var(--panel);border:2px solid var(--blue);
-      padding:25px;box-shadow:0 0 30px rgba(49,217,255,.25); }
-    .modal h3 { font-family:'Press Start 2P',monospace;color:var(--yellow);font-size:15px;line-height:1.7; }
-    .modal p { font-size:24px;line-height:1.35;color:var(--muted); }
-    .modal button { width:100%;margin-top:10px; }
-    @media (max-width:480px) {
-      body { padding:12px; }
-      .shell { padding:18px 14px; }
-      .topline { font-size:16px; }
-      .footer { justify-content:center;text-align:center; }
-      .pac { border-width:27px; }
-      .ghost { width:40px;height:40px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080914">
+<title>Bath Time — Arcade</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+:root{--bg:#080914;--panel:#101326;--blue:#31d9ff;--yellow:#ffe34d;--pink:#ff4fd8;--white:#f4f7ff;--muted:#a6aecb}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--white);font-family:'VT323',monospace;display:grid;place-items:center;padding:16px}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;background-image:linear-gradient(rgba(49,217,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(49,217,255,.12) 1px,transparent 1px);background-size:32px 32px}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:5;opacity:.1;background:repeating-linear-gradient(to bottom,transparent 0 3px,#000 4px 5px)}
+.shell{width:min(100%,900px);position:relative;z-index:1;border:2px solid var(--blue);padding:clamp(16px,3vw,30px);background:linear-gradient(145deg,rgba(17,21,43,.98),rgba(7,9,22,.99));box-shadow:0 0 12px #31d9ff88,0 0 45px #31d9ff20}
+.topline,.hud{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--blue);font-size:22px;letter-spacing:1px}
+.blink{animation:blink 1s steps(2,start) infinite;color:var(--yellow)}@keyframes blink{to{visibility:hidden}}
+.hero{text-align:center;padding:30px 0 20px}
+.logo{margin:0;font-family:'Press Start 2P',monospace;font-size:clamp(30px,8vw,65px);line-height:1.5;color:var(--yellow);text-shadow:4px 4px #a34b12,0 0 15px #ffe34d88}
+.logo span{display:block;color:var(--blue);font-size:.72em;text-shadow:4px 4px #075b8c,0 0 15px #31d9ff88}
+.tagline{color:var(--muted);font-size:27px;letter-spacing:2px}
+.menu{display:grid;gap:13px;width:min(100%,360px);margin:28px auto}
+button{border:2px solid var(--yellow);background:var(--yellow);color:#111323;padding:15px;font-family:'Press Start 2P',monospace;font-size:11px;line-height:1.7;cursor:pointer;box-shadow:4px 4px #9a6418}
+button:hover{filter:brightness(1.1);transform:translateY(-1px)}
+button.secondary{background:transparent;color:var(--blue);border-color:var(--blue);box-shadow:4px 4px #075b8c}
+.footer{border-top:1px dashed #31d9ff66;padding-top:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:20px}
+.footer strong{color:var(--yellow);font-weight:normal}
+.screen{display:none;text-align:center;padding:22px 0}.screen.active{display:block}
+.screen h2{font:clamp(16px,4vw,23px)/1.7 'Press Start 2P',monospace;color:var(--yellow)}
+.screen p{font-size:24px;color:var(--muted)}
+#gameScreen{display:none}#gameScreen.active{display:block}
+.hud{margin:12px 0;font-size:23px}
+.hud b{color:var(--yellow);font-weight:normal}
+.canvas-wrap{width:min(100%,570px);margin:0 auto;border:2px solid var(--blue);background:#050713;box-shadow:0 0 18px #31d9ff33;padding:5px}
+canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-action:none}
+.game-note{font-size:20px;color:var(--muted);margin:10px 0}
+.touch-controls{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,48px);gap:6px;justify-content:center;margin:14px auto 4px}
+.touch-controls button{padding:4px;font-size:20px;box-shadow:2px 2px #075b8c;background:#111a30;color:var(--blue);border-color:var(--blue);touch-action:none}
+.touch-controls button:nth-child(1){grid-column:2;grid-row:1}
+.touch-controls button:nth-child(2){grid-column:1;grid-row:2}
+.touch-controls button:nth-child(3){grid-column:2;grid-row:2}
+.touch-controls button:nth-child(4){grid-column:3;grid-row:2}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:15px 0}
+.actions button{min-width:145px}
+.modal-backdrop{display:none;position:fixed;inset:0;background:#000c;z-index:10;place-items:center;padding:20px}
+.modal-backdrop.open{display:grid}.modal{width:min(100%,470px);background:var(--panel);border:2px solid var(--blue);padding:24px;box-shadow:0 0 30px #31d9ff44}
+.modal h3{font:14px/1.8 'Press Start 2P',monospace;color:var(--yellow)}.modal p{font-size:23px;line-height:1.35;color:var(--muted)}
+@media(min-width:700px){.touch-controls{display:none}}
+@media(max-width:480px){body{padding:8px}.shell{padding:14px 10px}.topline{font-size:18px}.footer{justify-content:center;text-align:center}.hud{font-size:20px}}
+</style>
 </head>
 <body>
-  <div class="scanlines"></div>
-  <main class="shell">
-    <div class="topline"><span>★ PLAYER 1</span><span class="blink">● READY</span></div>
-
-    <section id="home" class="hero">
-      <h1 class="logo">BATH<span>TIME</span></h1>
-      <div class="mascots" aria-hidden="true">
-        <div class="ghost"></div><div class="dot"></div><div class="pac"></div><div class="dot"></div><div class="ghost"></div>
-      </div>
-      <p class="tagline">ONE PLAYER · ONE ADVENTURE</p>
-      <div class="menu">
-        <button id="startButton">▶ START GAME</button>
-        <button class="secondary" id="helpButton">HOW TO PLAY</button>
-      </div>
-    </section>
-
-    <section id="ready" class="screen">
-      <h2>GET READY!</h2>
-      <p>Tu aventura está a punto de comenzar.</p>
-      <p>El laberinto llegará en la siguiente etapa.</p>
-      <div class="menu"><button id="backButton">BACK TO MENU</button></div>
-    </section>
-
-    <div class="footer">
-      <span>MODE: <strong>1 PLAYER</strong></span>
-      <span>INSERT <strong>IMAGINATION</strong></span>
-      <span>© BATH TIME</span>
-    </div>
-  </main>
-
-  <div class="modal-backdrop" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-    <div class="modal">
-      <h3 id="helpTitle">HOW TO PLAY</h3>
-      <p>Explora el laberinto, recoge todos los objetos y completa tu misión.</p>
-      <p>PC: <span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span> o WASD</p>
-      <p>MÓVIL: controles táctiles que añadiremos al juego.</p>
-      <button id="closeHelp">GOT IT!</button>
-    </div>
+<div class="scanlines"></div>
+<main class="shell">
+ <div class="topline"><span>★ PLAYER 1</span><span class="blink">● READY</span></div>
+ <section id="home" class="hero">
+  <h1 class="logo">BATH<span>TIME</span></h1>
+  <p class="tagline">ONE PLAYER · ONE ADVENTURE</p>
+  <div class="menu"><button id="startButton">▶ START GAME</button><button class="secondary" id="helpButton">HOW TO PLAY</button></div>
+ </section>
+ <section id="gameScreen">
+  <div class="hud"><span>SCORE: <b id="score">0000</b></span><span>DOTS: <b id="remaining">00</b></span><span>LIVES: <b id="lives">♥ ♥ ♥</b></span></div>
+  <div class="canvas-wrap"><canvas id="game" width="420" height="480" aria-label="Laberinto del juego Bath Time"></canvas></div>
+  <p class="game-note" id="gameMessage">¡Recoge todos los puntos y evita al guardián!</p>
+  <div class="touch-controls" aria-label="Controles táctiles">
+   <button data-dir="up" aria-label="Arriba">▲</button><button data-dir="left" aria-label="Izquierda">◀</button><button data-dir="down" aria-label="Abajo">▼</button><button data-dir="right" aria-label="Derecha">▶</button>
   </div>
-
-  <script>
-    const home = document.getElementById('home');
-    const ready = document.getElementById('ready');
-    const modal = document.getElementById('helpModal');
-
-    document.getElementById('startButton').addEventListener('click', () => {
-      home.style.display = 'none';
-      ready.classList.add('active');
-    });
-    document.getElementById('backButton').addEventListener('click', () => {
-      ready.classList.remove('active');
-      home.style.display = 'block';
-    });
-    document.getElementById('helpButton').addEventListener('click', () => modal.classList.add('open'));
-    document.getElementById('closeHelp').addEventListener('click', () => modal.classList.remove('open'));
-    modal.addEventListener('click', event => {
-      if (event.target === modal) modal.classList.remove('open');
-    });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') modal.classList.remove('open');
-    });
-  </script>
+  <div class="actions"><button class="secondary" id="pauseButton">PAUSE</button><button class="secondary" id="menuButton">MAIN MENU</button></div>
+ </section>
+ <section id="ready" class="screen"><h2>GET READY!</h2><p>¡Prepárate para tu aventura!</p><div class="menu"><button id="backButton">BACK TO MENU</button></div></section>
+ <div class="footer"><span>MODE: <strong>1 PLAYER</strong></span><span>HIGH SCORE: <strong id="highScore">0000</strong></span><span>© BATH TIME</span></div>
+</main>
+<div class="modal-backdrop" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+ <div class="modal"><h3 id="helpTitle">HOW TO PLAY</h3><p>Recoge todos los puntos del laberinto y evita al guardián. ¡Si te atrapa, perderás una vida!</p><p>PC: usa las flechas o WASD. Móvil: utiliza los botones de dirección.</p><button id="closeHelp">GOT IT!</button></div>
+</div>
+<script>
+(() => {
+ const home=document.getElementById('home'), gameScreen=document.getElementById('gameScreen');
+ const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
+ const scoreEl=document.getElementById('score'), remainingEl=document.getElementById('remaining'), livesEl=document.getElementById('lives');
+ const message=document.getElementById('gameMessage'), highEl=document.getElementById('highScore');
+ const modal=document.getElementById('helpModal');
+ const map=[
+  "##############",
+  "#............#",
+  "#.##.####.##.#",
+  "#............#",
+  "#.##.#..#.##.#",
+  "#....#..#....#",
+  "####.#..#.####",
+  "#............#",
+  "#.##.####.##.#",
+  "#............#",
+  "##############"
+ ];
+ const TILE=30, W=map[0].length, H=map.length;
+ let player, enemy, dots, score=0, lives=3, running=false, paused=false, raf=0, last=0, moveClock=0, enemyClock=0, direction={x:0,y:0}, queued={x:0,y:0}, mouth=0;
+ let high=Number(localStorage.getItem('bathTimeHighScore')||0); highEl.textContent=String(high).padStart(4,'0');
+ const walls=(x,y)=>!map[y]||map[y][x]==='#';
+ function resetPositions(){player={x:1,y:1};enemy={x:12,y:9};direction={x:0,y:0};queued={x:0,y:0};}
+ function newGame(){score=0;lives=3;dots=new Set();map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='.')dots.add(`${x},${y}`)}));resetPositions();updateHud();message.textContent='¡Recoge todos los puntos y evita al guardián!';}
+ function updateHud(){scoreEl.textContent=String(score).padStart(4,'0');remainingEl.textContent=String(dots.size).padStart(2,'0');livesEl.textContent='♥ '.repeat(lives).trim()||'—';}
+ function draw(){
+  ctx.fillStyle='#050713';ctx.fillRect(0,0,canvas.width,canvas.height);
+  map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='#'){ctx.fillStyle='#102b66';ctx.fillRect(x*TILE+2,y*TILE+2,TILE-4,TILE-4);ctx.strokeStyle='#31d9ff';ctx.lineWidth=1.5;ctx.strokeRect(x*TILE+4,y*TILE+4,TILE-8,TILE-8);}}));
+  dots.forEach(key=>{const [x,y]=key.split(',').map(Number);ctx.fillStyle='#ffe9a1';ctx.beginPath();ctx.arc(x*TILE+15,y*TILE+15,3,0,Math.PI*2);ctx.fill();});
+  drawPlayer();drawEnemy();
+ }
+ function drawPlayer(){const cx=player.x*TILE+15,cy=player.y*TILE+15;ctx.fillStyle='#ffe34d';ctx.shadowColor='#ffe34d';ctx.shadowBlur=12;let angle=0;if(direction.x===-1)angle=Math.PI;if(direction.y===-1)angle=-Math.PI/2;if(direction.y===1)angle=Math.PI/2;const open=.18+Math.abs(Math.sin(mouth))*0.28;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,12,angle+open,angle+Math.PI*2-open);ctx.closePath();ctx.fill();ctx.shadowBlur=0;}
+ function drawEnemy(){const x=enemy.x*TILE+15,y=enemy.y*TILE+15;ctx.fillStyle='#ff4fd8';ctx.shadowColor='#ff4fd8';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(x,y-2,11,Math.PI,0);ctx.lineTo(x+11,y+10);ctx.lineTo(x+5,y+6);ctx.lineTo(x,y+10);ctx.lineTo(x-5,y+6);ctx.lineTo(x-11,y+10);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='white';ctx.fillRect(x-6,y-4,4,6);ctx.fillRect(x+3,y-4,4,6);ctx.fillStyle='#15172c';ctx.fillRect(x-5,y-2,2,3);ctx.fillRect(x+4,y-2,2,3);}
+ function canMove(pos,dir){return !walls(pos.x+dir.x,pos.y+dir.y);}
+ function moveEntity(entity,dir){if(canMove(entity,dir)){entity.x+=dir.x;entity.y+=dir.y;return true;}return false;}
+ function setDirection(dir){queued=dir;}
+ function step(){
+  if(canMove(player,queued)){direction=queued;}
+  moveEntity(player,direction);
+  const key=`${player.x},${player.y}`;if(dots.has(key)){dots.delete(key);score+=10;updateHud();}
+  if(player.x===enemy.x&&player.y===enemy.y){hit();}
+  if(dots.size===0){running=false;message.textContent='¡Nivel completado!';draw();setTimeout(()=>alert('¡Felicidades! Has completado este nivel de Bath Time. En la siguiente etapa añadiremos el PDF de recompensa.'),80);return;}
+ }
+ function moveEnemy(){const choices=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>canMove(enemy,d));if(!choices.length)return;choices.sort((a,b)=>{const da=Math.abs(enemy.x+a.x-player.x)+Math.abs(enemy.y+a.y-player.y);const db=Math.abs(enemy.x+b.x-player.x)+Math.abs(enemy.y+b.y-player.y);return da-db;});const chosen=Math.random()<.72?choices[0]:choices[Math.floor(Math.random()*choices.length)];moveEntity(enemy,chosen);if(player.x===enemy.x&&player.y===enemy.y)hit();}
+ function hit(){lives--;updateHud();if(lives<=0){running=false;message.textContent='GAME OVER';setTimeout(()=>alert(`GAME OVER — Puntuación: ${score}`),80);return;}resetPositions();message.textContent='¡Cuidado! Te queda(n) '+lives+' vida(s).';}
+ function loop(ts){if(!running)return;const dt=Math.min(ts-last,50);last=ts;if(!paused){moveClock+=dt;enemyClock+=dt;if(moveClock>145){step();moveClock=0;mouth+=.8;}if(enemyClock>390){moveEnemy();enemyClock=0;}draw();}raf=requestAnimationFrame(loop);}
+ function start(){cancelAnimationFrame(raf);newGame();home.style.display='none';document.getElementById('ready').classList.remove('active');gameScreen.style.display='block';gameScreen.classList.add('active');running=true;paused=false;last=performance.now();draw();raf=requestAnimationFrame(loop);}
+ function backMenu(){running=false;cancelAnimationFrame(raf);gameScreen.style.display='none';gameScreen.classList.remove('active');home.style.display='block';}
+ const dirs={ArrowUp:{x:0,y:-1},w:{x:0,y:-1},ArrowDown:{x:0,y:1},s:{x:0,y:1},ArrowLeft:{x:-1,y:0},a:{x:-1,y:0},ArrowRight:{x:1,y:0},d:{x:1,y:0}};
+ document.addEventListener('keydown',e=>{if(dirs[e.key]){e.preventDefault();setDirection(dirs[e.key]);}if(e.key==='Escape'&&running)paused=!paused;});
+ document.querySelectorAll('[data-dir]').forEach(btn=>{const d={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}}[btn.dataset.dir];btn.addEventListener('pointerdown',e=>{e.preventDefault();setDirection(d);});});
+ document.getElementById('startButton').addEventListener('click',start);
+ document.getElementById('backButton').addEventListener('click',backMenu);
+ document.getElementById('menuButton').addEventListener('click',backMenu);
+ document.getElementById('pauseButton').addEventListener('click',()=>{paused=!paused;document.getElementById('pauseButton').textContent=paused?'RESUME':'PAUSE';});
+ document.getElementById('helpButton').addEventListener('click',()=>modal.classList.add('open'));
+ document.getElementById('closeHelp').addEventListener('click',()=>modal.classList.remove('open'));
+ modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});
+ highEl.textContent=String(high).padStart(4,'0');
+})();
+</script>
 </body>
 </html>

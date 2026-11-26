@@ -11,7 +11,7 @@
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:var(--bg);color:var(--white);font-family:'VT323',monospace;display:grid;place-items:center;padding:16px}
 body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;background-image:linear-gradient(rgba(49,217,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(49,217,255,.12) 1px,transparent 1px);background-size:32px 32px}
-.scanlines{position:fixed;inset:0;pointer-events:none;z-index:5;opacity:.1;background:repeating-linear-gradient(to bottom,transparent 0 3px,#000 4px 5px)}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:20;opacity:.1;background:repeating-linear-gradient(to bottom,transparent 0 3px,#000 4px 5px)}
 .shell{width:min(100%,900px);position:relative;z-index:1;border:2px solid var(--blue);padding:clamp(16px,3vw,30px);background:linear-gradient(145deg,rgba(17,21,43,.98),rgba(7,9,22,.99));box-shadow:0 0 12px #31d9ff88,0 0 45px #31d9ff20}
 .topline,.hud{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--blue);font-size:22px;letter-spacing:1px}
 .blink{animation:blink 1s steps(2,start) infinite;color:var(--yellow)}@keyframes blink{to{visibility:hidden}}
@@ -22,13 +22,11 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;bac
 .menu{display:grid;gap:13px;width:min(100%,360px);margin:28px auto}
 button{border:2px solid var(--yellow);background:var(--yellow);color:#111323;padding:15px;font-family:'Press Start 2P',monospace;font-size:11px;line-height:1.7;cursor:pointer;box-shadow:4px 4px #9a6418}
 button:hover{filter:brightness(1.1);transform:translateY(-1px)}
+button:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
 button.secondary{background:transparent;color:var(--blue);border-color:var(--blue);box-shadow:4px 4px #075b8c}
 .footer{border-top:1px dashed #31d9ff66;padding-top:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:20px}
 .footer strong{color:var(--yellow);font-weight:normal}
-.screen{display:none;text-align:center;padding:22px 0}.screen.active{display:block}
-.screen h2{font:clamp(16px,4vw,23px)/1.7 'Press Start 2P',monospace;color:var(--yellow)}
-.screen p{font-size:24px;color:var(--muted)}
-#gameScreen{display:none}#gameScreen.active{display:block}
+#gameScreen{display:none;text-align:center;padding:22px 0}#gameScreen.active{display:block}
 .hud{margin:12px 0;font-size:23px}
 .hud b{color:var(--yellow);font-weight:normal}
 .canvas-wrap{width:min(100%,570px);margin:0 auto;border:2px solid var(--blue);background:#050713;box-shadow:0 0 18px #31d9ff33;padding:5px}
@@ -45,6 +43,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 .modal-backdrop{display:none;position:fixed;inset:0;background:#000c;z-index:10;place-items:center;padding:20px}
 .modal-backdrop.open{display:grid}.modal{width:min(100%,470px);background:var(--panel);border:2px solid var(--blue);padding:24px;box-shadow:0 0 30px #31d9ff44}
 .modal h3{font:14px/1.8 'Press Start 2P',monospace;color:var(--yellow)}.modal p{font-size:23px;line-height:1.35;color:var(--muted)}
+.modal .row{display:grid;gap:12px;margin-top:18px}
 @media(min-width:700px){.touch-controls{display:none}}
 @media(max-width:480px){body{padding:8px}.shell{padding:14px 10px}.topline{font-size:18px}.footer{justify-content:center;text-align:center}.hud{font-size:20px}}
 </style>
@@ -52,7 +51,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <body>
 <div class="scanlines"></div>
 <main class="shell">
- <div class="topline"><span>★ PLAYER 1</span><span class="blink">● READY</span></div>
+ <div class="topline"><span>★ JAMELY</span><span class="blink">● READY</span></div>
  <section id="home" class="hero">
   <h1 class="logo">BATH<span>TIME</span></h1>
   <p class="tagline">ONE PLAYER · ONE ADVENTURE</p>
@@ -60,26 +59,40 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
  </section>
  <section id="gameScreen">
   <div class="hud"><span>SCORE: <b id="score">0000</b></span><span>DOTS: <b id="remaining">00</b></span><span>LIVES: <b id="lives">♥ ♥ ♥</b></span></div>
-  <div class="canvas-wrap"><canvas id="game" width="420" height="480" aria-label="Laberinto del juego Bath Time"></canvas></div>
+  <div class="canvas-wrap"><canvas id="game" width="420" height="330" aria-label="Laberinto del juego Bath Time"></canvas></div>
   <p class="game-note" id="gameMessage">¡Recoge todos los puntos y evita al guardián!</p>
   <div class="touch-controls" aria-label="Controles táctiles">
    <button data-dir="up" aria-label="Arriba">▲</button><button data-dir="left" aria-label="Izquierda">◀</button><button data-dir="down" aria-label="Abajo">▼</button><button data-dir="right" aria-label="Derecha">▶</button>
   </div>
   <div class="actions"><button class="secondary" id="pauseButton">PAUSE</button><button class="secondary" id="menuButton">MAIN MENU</button></div>
  </section>
- <section id="ready" class="screen"><h2>GET READY!</h2><p>¡Prepárate para tu aventura!</p><div class="menu"><button id="backButton">BACK TO MENU</button></div></section>
  <div class="footer"><span>MODE: <strong>1 PLAYER</strong></span><span>HIGH SCORE: <strong id="highScore">0000</strong></span><span>© BATH TIME</span></div>
 </main>
+
 <div class="modal-backdrop" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
- <div class="modal"><h3 id="helpTitle">HOW TO PLAY</h3><p>Recoge todos los puntos del laberinto y evita al guardián. ¡Si te atrapa, perderás una vida!</p><p>PC: usa las flechas o WASD. Móvil: utiliza los botones de dirección.</p><button id="closeHelp">GOT IT!</button></div>
+ <div class="modal"><h3 id="helpTitle">HOW TO PLAY</h3><p>Recoge todos los puntos del laberinto y evita al guardián. ¡Si te atrapa, perderás una vida!</p><p>PC: usa las flechas o WASD. Móvil: botones de dirección o desliza el dedo sobre el laberinto. Completa el nivel para desbloquear la recompensa. </p><button id="closeHelp">GOT IT!</button></div>
 </div>
+
+<div class="modal-backdrop" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+ <div class="modal">
+  <h3 id="resultTitle">¡NIVEL COMPLETADO!</h3>
+  <p id="resultText"></p>
+  <div class="row">
+   <button id="rewardButton">ABRIR RECOMPENSA</button>
+   <button class="secondary" id="retryButton">JUGAR DE NUEVO</button>
+  </div>
+ </div>
+</div>
+
 <script>
 (() => {
- const home=document.getElementById('home'), gameScreen=document.getElementById('gameScreen');
- const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
- const scoreEl=document.getElementById('score'), remainingEl=document.getElementById('remaining'), livesEl=document.getElementById('lives');
- const message=document.getElementById('gameMessage'), highEl=document.getElementById('highScore');
- const modal=document.getElementById('helpModal');
+ // Ruta del PDF: debe estar en la misma carpeta que este index.html
+ const PDF_URL = 'Hora_del_bano.pdf';
+
+ const $ = id => document.getElementById(id);
+ const home=$('home'), gameScreen=$('gameScreen'), canvas=$('game'), ctx=canvas.getContext('2d');
+ const scoreEl=$('score'), remainingEl=$('remaining'), livesEl=$('lives'), message=$('gameMessage'), highEl=$('highScore');
+ const helpModal=$('helpModal'), resultModal=$('resultModal'), pauseBtn=$('pauseButton');
  const map=[
   "##############",
   "#............#",
@@ -93,47 +106,138 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
   "#............#",
   "##############"
  ];
- const TILE=30, W=map[0].length, H=map.length;
- let player, enemy, dots, score=0, lives=3, running=false, paused=false, raf=0, last=0, moveClock=0, enemyClock=0, direction={x:0,y:0}, queued={x:0,y:0}, mouth=0;
- let high=Number(localStorage.getItem('bathTimeHighScore')||0); highEl.textContent=String(high).padStart(4,'0');
+ const TILE=30, H=map.length;
+ let player, enemy, dots, score=0, lives=3, running=false, paused=false, raf=0, last=0, resumeAt=0;
+ let queued={x:0,y:0}, face={x:1,y:0}, mouth=0;
+ const PSPEED=5.4, GSPEED=4.4; // casillas por segundo (el fantasma es ~15% más lento, como en el original)
+
+ const store={get(){try{return Number(localStorage.getItem('bathTimeHighScore')||0)}catch(e){return 0}},set(v){try{localStorage.setItem('bathTimeHighScore',v)}catch(e){}}};
+ let high=store.get();
+ const pad=(n,l=4)=>String(n).padStart(l,'0');
+ highEl.textContent=pad(high);
+
  const walls=(x,y)=>!map[y]||map[y][x]==='#';
- function resetPositions(){player={x:1,y:1};enemy={x:12,y:9};direction={x:0,y:0};queued={x:0,y:0};}
+ function resetPositions(){player={x:1,y:1,dx:0,dy:0};enemy={x:12,y:9,dx:0,dy:0};face={x:1,y:0};queued={x:0,y:0};resumeAt=performance.now()+700;}
  function newGame(){score=0;lives=3;dots=new Set();map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='.')dots.add(`${x},${y}`)}));resetPositions();updateHud();message.textContent='¡Recoge todos los puntos y evita al guardián!';}
- function updateHud(){scoreEl.textContent=String(score).padStart(4,'0');remainingEl.textContent=String(dots.size).padStart(2,'0');livesEl.textContent='♥ '.repeat(lives).trim()||'—';}
+ function updateHud(){scoreEl.textContent=pad(score);remainingEl.textContent=pad(dots.size,2);livesEl.textContent='♥ '.repeat(lives).trim()||'—';}
+
  function draw(){
   ctx.fillStyle='#050713';ctx.fillRect(0,0,canvas.width,canvas.height);
   map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='#'){ctx.fillStyle='#102b66';ctx.fillRect(x*TILE+2,y*TILE+2,TILE-4,TILE-4);ctx.strokeStyle='#31d9ff';ctx.lineWidth=1.5;ctx.strokeRect(x*TILE+4,y*TILE+4,TILE-8,TILE-8);}}));
   dots.forEach(key=>{const [x,y]=key.split(',').map(Number);ctx.fillStyle='#ffe9a1';ctx.beginPath();ctx.arc(x*TILE+15,y*TILE+15,3,0,Math.PI*2);ctx.fill();});
   drawPlayer();drawEnemy();
  }
- function drawPlayer(){const cx=player.x*TILE+15,cy=player.y*TILE+15;ctx.fillStyle='#ffe34d';ctx.shadowColor='#ffe34d';ctx.shadowBlur=12;let angle=0;if(direction.x===-1)angle=Math.PI;if(direction.y===-1)angle=-Math.PI/2;if(direction.y===1)angle=Math.PI/2;const open=.18+Math.abs(Math.sin(mouth))*0.28;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,12,angle+open,angle+Math.PI*2-open);ctx.closePath();ctx.fill();ctx.shadowBlur=0;}
+ function drawPlayer(){const cx=player.x*TILE+15,cy=player.y*TILE+15;ctx.fillStyle='#ffe34d';ctx.shadowColor='#ffe34d';ctx.shadowBlur=12;let angle=0;if(face.x===-1)angle=Math.PI;if(face.y===-1)angle=-Math.PI/2;if(face.y===1)angle=Math.PI/2;const open=.18+Math.abs(Math.sin(mouth))*0.28;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,12,angle+open,angle+Math.PI*2-open);ctx.closePath();ctx.fill();ctx.shadowBlur=0;}
  function drawEnemy(){const x=enemy.x*TILE+15,y=enemy.y*TILE+15;ctx.fillStyle='#ff4fd8';ctx.shadowColor='#ff4fd8';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(x,y-2,11,Math.PI,0);ctx.lineTo(x+11,y+10);ctx.lineTo(x+5,y+6);ctx.lineTo(x,y+10);ctx.lineTo(x-5,y+6);ctx.lineTo(x-11,y+10);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='white';ctx.fillRect(x-6,y-4,4,6);ctx.fillRect(x+3,y-4,4,6);ctx.fillStyle='#15172c';ctx.fillRect(x-5,y-2,2,3);ctx.fillRect(x+4,y-2,2,3);}
- function canMove(pos,dir){return !walls(pos.x+dir.x,pos.y+dir.y);}
- function moveEntity(entity,dir){if(canMove(entity,dir)){entity.x+=dir.x;entity.y+=dir.y;return true;}return false;}
- function setDirection(dir){queued=dir;}
- function step(){
-  if(canMove(player,queued)){direction=queued;}
-  moveEntity(player,direction);
-  const key=`${player.x},${player.y}`;if(dots.has(key)){dots.delete(key);score+=10;updateHud();}
-  if(player.x===enemy.x&&player.y===enemy.y){hit();}
-  if(dots.size===0){running=false;message.textContent='¡Nivel completado!';draw();setTimeout(()=>alert('¡Felicidades! Has completado este nivel de Bath Time. En la siguiente etapa añadiremos el PDF de recompensa.'),80);return;}
+
+ const setDirection=dir=>{queued=dir;};
+ const canMove=(x,y,d)=>!walls(Math.round(x)+d.x,Math.round(y)+d.y);
+ const EPS=1e-4;
+ // Mueve una entidad de forma continua; en el centro de cada casilla decide hacia dónde seguir
+ function advance(e,dist,pick){
+  let guard=8;
+  while(dist>EPS&&guard--){
+   const atC=Math.abs(e.x-Math.round(e.x))<EPS&&Math.abs(e.y-Math.round(e.y))<EPS;
+   if(atC){
+    e.x=Math.round(e.x);e.y=Math.round(e.y);pick(e);
+    if(!(e.dx||e.dy)||!canMove(e.x,e.y,{x:e.dx,y:e.dy})){e.dx=e.dy=0;return;}
+   }
+   const horiz=e.dx!==0,pos=horiz?e.x:e.y,sign=horiz?e.dx:e.dy;
+   const next=atC?pos+sign:(sign>0?Math.ceil(pos):Math.floor(pos));
+   const d=Math.abs(next-pos),m=Math.min(d,dist);
+   if(horiz)e.x+=sign*m;else e.y+=sign*m;
+   dist-=m;
+   if(m>=d-EPS){if(horiz)e.x=next;else e.y=next;}
+  }
  }
- function moveEnemy(){const choices=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>canMove(enemy,d));if(!choices.length)return;choices.sort((a,b)=>{const da=Math.abs(enemy.x+a.x-player.x)+Math.abs(enemy.y+a.y-player.y);const db=Math.abs(enemy.x+b.x-player.x)+Math.abs(enemy.y+b.y-player.y);return da-db;});const chosen=Math.random()<.72?choices[0]:choices[Math.floor(Math.random()*choices.length)];moveEntity(enemy,chosen);if(player.x===enemy.x&&player.y===enemy.y)hit();}
- function hit(){lives--;updateHud();if(lives<=0){running=false;message.textContent='GAME OVER';setTimeout(()=>alert(`GAME OVER — Puntuación: ${score}`),80);return;}resetPositions();message.textContent='¡Cuidado! Te queda(n) '+lives+' vida(s).';}
- function loop(ts){if(!running)return;const dt=Math.min(ts-last,50);last=ts;if(!paused){moveClock+=dt;enemyClock+=dt;if(moveClock>145){step();moveClock=0;mouth+=.8;}if(enemyClock>390){moveEnemy();enemyClock=0;}draw();}raf=requestAnimationFrame(loop);}
- function start(){cancelAnimationFrame(raf);newGame();home.style.display='none';document.getElementById('ready').classList.remove('active');gameScreen.style.display='block';gameScreen.classList.add('active');running=true;paused=false;last=performance.now();draw();raf=requestAnimationFrame(loop);}
- function backMenu(){running=false;cancelAnimationFrame(raf);gameScreen.style.display='none';gameScreen.classList.remove('active');home.style.display='block';}
- const dirs={ArrowUp:{x:0,y:-1},w:{x:0,y:-1},ArrowDown:{x:0,y:1},s:{x:0,y:1},ArrowLeft:{x:-1,y:0},a:{x:-1,y:0},ArrowRight:{x:1,y:0},d:{x:1,y:0}};
- document.addEventListener('keydown',e=>{if(dirs[e.key]){e.preventDefault();setDirection(dirs[e.key]);}if(e.key==='Escape'&&running)paused=!paused;});
- document.querySelectorAll('[data-dir]').forEach(btn=>{const d={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}}[btn.dataset.dir];btn.addEventListener('pointerdown',e=>{e.preventDefault();setDirection(d);});});
- document.getElementById('startButton').addEventListener('click',start);
- document.getElementById('backButton').addEventListener('click',backMenu);
- document.getElementById('menuButton').addEventListener('click',backMenu);
- document.getElementById('pauseButton').addEventListener('click',()=>{paused=!paused;document.getElementById('pauseButton').textContent=paused?'RESUME':'PAUSE';});
- document.getElementById('helpButton').addEventListener('click',()=>modal.classList.add('open'));
- document.getElementById('closeHelp').addEventListener('click',()=>modal.classList.remove('open'));
- modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});
- highEl.textContent=String(high).padStart(4,'0');
+ const pickPlayer=e=>{
+  if((queued.x||queued.y)&&canMove(e.x,e.y,queued)){e.dx=queued.x;e.dy=queued.y;}
+  if(e.dx||e.dy)face={x:e.dx,y:e.dy};
+ };
+ const pickGhost=e=>{
+  let ch=[R,L,D,U].filter(d=>canMove(e.x,e.y,d));
+  const fwd=ch.filter(d=>!(d.x===-e.dx&&d.y===-e.dy));
+  if(fwd.length)ch=fwd; // no da media vuelta salvo en callejón sin salida
+  const px=Math.round(player.x),py=Math.round(player.y);
+  const dist=d=>Math.abs(e.x+d.x-px)+Math.abs(e.y+d.y-py);
+  ch.sort((m,n)=>dist(m)-dist(n));
+  const c=Math.random()<.75?ch[0]:ch[Math.floor(Math.random()*ch.length)];
+  e.dx=c.x;e.dy=c.y;
+ };
+ function update(dt){
+  // el jugador puede invertir el sentido en cualquier momento, como en el original
+  if((player.dx||player.dy)&&queued.x===-player.dx&&queued.y===-player.dy){player.dx=queued.x;player.dy=queued.y;face={x:queued.x,y:queued.y};}
+  advance(player,PSPEED*dt,pickPlayer);
+  if(player.dx||player.dy)mouth+=dt*16;
+  const key=`${Math.round(player.x)},${Math.round(player.y)}`;
+  if(dots.has(key)){dots.delete(key);score+=10;updateHud();}
+  advance(enemy,GSPEED*dt,pickGhost);
+  if(Math.hypot(player.x-enemy.x,player.y-enemy.y)<.6){hit();return;}
+  if(dots.size===0)finish(true);
+ }
+ function hit(){
+  lives--;updateHud();
+  if(lives<=0){finish(false);return;}
+  resetPositions();message.textContent=`¡Cuidado! Te quedan ${lives} vida${lives===1?'':'s'}.`;
+ }
+
+ function finish(win){
+  running=false;cancelAnimationFrame(raf);draw();
+  if(score>high){high=score;store.set(high);highEl.textContent=pad(high);}
+  message.textContent=win?'¡Nivel completado!':'GAME OVER';
+  $('resultTitle').textContent=win?'¡NIVEL COMPLETADO!':'GAME OVER';
+  $('resultText').textContent=win?`Puntuación: ${score}. Tu recompensa te está esperando.`:`Puntuación: ${score}. ¡Inténtalo de nuevo!`;
+  $('rewardButton').style.display=win?'':'none';
+  $('retryButton').textContent=win?'JUGAR DE NUEVO':'REINTENTAR';
+  setTimeout(()=>{resultModal.classList.add('open');(win?$('rewardButton'):$('retryButton')).focus();},350);
+ }
+ function openReward(){
+  // se llama desde un clic, así que el navegador no bloquea la nueva pestaña
+  const w=window.open(PDF_URL,'_blank');
+  if(!w)window.location.href=PDF_URL;
+ }
+
+ function loop(ts){
+  if(!running)return;
+  const dt=Math.min((ts-last)/1000,.05);last=ts;
+  if(!paused&&ts>=resumeAt)update(dt);
+  if(running){draw();raf=requestAnimationFrame(loop);}
+ }
+ function setPaused(p){paused=p;pauseBtn.textContent=paused?'RESUME':'PAUSE';}
+ function start(){
+  cancelAnimationFrame(raf);resultModal.classList.remove('open');newGame();setPaused(false);
+  home.style.display='none';gameScreen.style.display='block';gameScreen.classList.add('active');
+  running=true;last=performance.now();draw();raf=requestAnimationFrame(loop);
+ }
+ function backMenu(){running=false;cancelAnimationFrame(raf);resultModal.classList.remove('open');gameScreen.style.display='none';gameScreen.classList.remove('active');home.style.display='block';}
+
+ const U={x:0,y:-1},D={x:0,y:1},L={x:-1,y:0},R={x:1,y:0};
+ const keys={arrowup:U,w:U,arrowdown:D,s:D,arrowleft:L,a:L,arrowright:R,d:R};
+ document.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(keys[k]&&running){e.preventDefault();setDirection(keys[k]);}
+  if((k==='escape'||k==='p')&&running)setPaused(!paused);
+ });
+ document.querySelectorAll('[data-dir]').forEach(btn=>{
+  const d={up:U,down:D,left:L,right:R}[btn.dataset.dir];
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();setDirection(d);});
+ });
+ // deslizar el dedo sobre el laberinto
+ let t0=null;
+ canvas.addEventListener('pointerdown',e=>{t0={x:e.clientX,y:e.clientY};});
+ canvas.addEventListener('pointerup',e=>{
+  if(!t0)return;const dx=e.clientX-t0.x,dy=e.clientY-t0.y;t0=null;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
+  setDirection(Math.abs(dx)>Math.abs(dy)?(dx>0?R:L):(dy>0?D:U));
+ });
+ $('startButton').addEventListener('click',start);
+ $('menuButton').addEventListener('click',backMenu);
+ $('retryButton').addEventListener('click',start);
+ $('rewardButton').addEventListener('click',openReward);
+ pauseBtn.addEventListener('click',()=>setPaused(!paused));
+ $('helpButton').addEventListener('click',()=>helpModal.classList.add('open'));
+ $('closeHelp').addEventListener('click',()=>helpModal.classList.remove('open'));
+ helpModal.addEventListener('click',e=>{if(e.target===helpModal)helpModal.classList.remove('open');});
 })();
 </script>
 </body>

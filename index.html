@@ -82,6 +82,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
   <div class="row">
    <button id="rewardButton">ABRIR RECOMPENSA</button>
    <button class="secondary" id="retryButton">JUGAR DE NUEVO</button>
+   <button class="secondary" id="skipButton">¿TE RINDES ESPECIAL?</button>
   </div>
  </div>
 </div>
@@ -115,7 +116,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
  const TILE=30, H=map.length;
  let player, enemy, dots, score=0, lives=3, running=false, paused=false, raf=0, last=0, resumeAt=0;
  let queued={x:0,y:0}, face={x:1,y:0}, mouth=0;
- const PSPEED=6.4, GSPEED=3.0, GSPEED_MAX=5.4, RAMP=15; // casillas por segundo; el fantasma acelera de 3.0 a 5.4 durante 15 s de juego
+ const PSPEED=6.4, GSPEED=1.5, GSPEED_MAX=4.0, RAMP=60; // casillas por segundo; el fantasma acelera linealmente de 1.5 a 4.0 durante 60 s de juego
  let gameTime=0; // segundos de juego activo (no cuenta la pausa)
 
  const store={get(){try{return Number(localStorage.getItem('bathTimeHighScore')||0)}catch(e){return 0}},set(v){try{localStorage.setItem('bathTimeHighScore',v)}catch(e){}}};
@@ -197,6 +198,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
   $('resultTitle').textContent=win?'¡NIVEL COMPLETADO!':'GAME OVER';
   $('resultText').textContent=win?`Puntuación: ${score}. Tu recompensa te está esperando.`:`Puntuación: ${score}. ¡Inténtalo de nuevo!`;
   $('rewardButton').style.display=win?'':'none';
+  $('skipButton').style.display=win?'none':'';
   $('retryButton').textContent=win?'JUGAR DE NUEVO':'REINTENTAR';
   setTimeout(()=>{resultModal.classList.add('open');(win?$('rewardButton'):$('retryButton')).focus();},350);
  }
@@ -243,6 +245,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
  $('menuButton').addEventListener('click',backMenu);
  $('retryButton').addEventListener('click',start);
  $('rewardButton').addEventListener('click',openReward);
+ $('skipButton').addEventListener('click',openReward);
  pauseBtn.addEventListener('click',()=>setPaused(!paused));
  $('helpButton').addEventListener('click',()=>helpModal.classList.add('open'));
  $('closeHelp').addEventListener('click',()=>helpModal.classList.remove('open'));
